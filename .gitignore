@@ -1,0 +1,19 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment folders
+env/
+venv/
+
+# IDE nastavení
+.vscode/
+.idea/
+
+# Soubory pro ukládání hry (pokud používáš pickle)
+*.pkl
+*.sav
