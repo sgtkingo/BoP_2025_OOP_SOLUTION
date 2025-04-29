@@ -34,11 +34,11 @@ class Map:
         self.height = height
         self.elements = terrains.get("elements")
         self.weights = terrains.get("weights")
+        # Set name
+        self.name = name
         # Generate defaut random map
         if generate_inplace:
           self.generate_random()
-        # Set name
-        self.name = name
 
     def generate_random(self):
         print("🗺️ Creating map... Please wait.")

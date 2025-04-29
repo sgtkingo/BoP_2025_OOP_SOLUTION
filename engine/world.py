@@ -31,10 +31,10 @@ class World:
             hero (Hero): Hrdina, který bude umístěn do světa.
         """
         # Ulož si hrdinu
-        self.hero: Hero = hero
+        self.hero:Hero = hero
 
         # Inicializace mapy
-        self.map = map
+        self.map:Map = map
 
         # Inicializace 2D vrstvy objektů
         self.objects_layer = np.empty((map.height, map.width), dtype=object)
@@ -42,23 +42,30 @@ class World:
             for x in range(map.width):
                 self.objects_layer[y, x] = []
 
-        # Umísti hráče doprostřed
-        self.set(map.width // 2, map.height // 2, self.hero)
-
     def generate(self):
         print(f"🧭 Starting generating {self.map.name} world...")
         self.map.generate_random()
+        # Umísti hráče na náhodnou pozici na mapě
+        hx = random.randint(0, self.map.width - 1)
+        hy = random.randint(0, self.map.height - 1)
+        # Zkontroluj, zda je pozice volná (neobsazená)
+        # Pokud není, najdi jinou pozici
+        while not self.map.get(hx, hy).is_walkable():
+            hx = random.randint(0, self.map.width - 1)
+            hy = random.randint(0, self.map.height - 1)
+        # Umísti hrdinu do hry
+        self.set(hx, hy, self.hero)
 
         number_of_objects = self.map.get_area()
         for _ in range(number_of_objects):
           # Enemy
-          if random.random() <= 0.05:
+          if random.random() <= 0.025:
             enemy = Enemy(generate_nickname("enemy"), random.randint(1, 36))
             x, y = random.randint(0, self.map.width - 1), random.randint(0, self.map.height - 1)
             self.set(x, y, enemy)
 
           # NPC
-          if random.random() <= 0.02:
+          if random.random() <= 0.015:
             name = generate_nickname(random.choice(["npc", "magic"]))
             desc = generate_description()
             npc = NPC(name, desc, random.randint(1, 36))
@@ -82,9 +89,20 @@ class World:
         self.set(random.randint(0, self.map.width - 1),
                  random.randint(0, self.map.height - 1), food)
 
-    def set(self, x: int, y: int, obj: object):
+    def set(self, x: int, y: int, obj: ICharacter | IItem):
         """Umístí objekt do světa a aktualizuje jeho souřadnice."""
         if self.map.in_bounds(x, y):
+            # Přidej objekt na novou pozici
+            obj.set_position(x, y)
+            self.objects_layer[y, x].append(obj)
+
+    def move(self, obj: ICharacter | IItem, x: int, y: int):
+        """Pohne objektem na novou pozici."""
+        if self.map.in_bounds(x, y):
+            # Odstraň objekt z předchozí pozice
+            if obj in self.get(obj.x, obj.y):
+                self.objects_layer[obj.y, obj.x].remove(obj)
+            # Přidej objekt na novou pozici
             obj.set_position(x, y)
             self.objects_layer[y, x].append(obj)
 
